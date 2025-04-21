@@ -7,32 +7,28 @@
 
 import SwiftUI
 
-struct User: Identifiable, Comparable {
-    var id: UUID
-    var firstName: String
-    var lastName: String
-    
-    static func < (lhs: User, rhs: User) -> Bool {
-        lhs.firstName < rhs.firstName
-    }
-}
-
 struct ContentView: View {
-    let users = [
-        User(id: UUID(), firstName: "Carlos", lastName: "Eduardo"),
-        User(id: UUID(), firstName: "João", lastName: "Silva"),
-        User(id: UUID(), firstName: "Maria", lastName: "José"),
-        User(id: UUID(), firstName: "Amanda", lastName: "Rocks"),
-        User(id: UUID(), firstName: "Valéria", lastName: "Twists"),
-    ].sorted()
+   
+    @State private var retrievedData: String?
     
     var body: some View {
-        VStack {
-            ForEach(users) { user in
-                Text(user.firstName + " " + user.lastName)
+        Button("Read and Write") {
+            let data = Data("Test Message".utf8)
+            let url = URL.documentsDirectory.appending(path: "message.txt")
+            
+            do {
+                try data.write(to: url)
+                let readData = try Data(contentsOf: url)
+                print(String(data: readData, encoding: .utf8) ?? "Could not read data")
+                retrievedData = String(data: readData, encoding: .utf8)
+            } catch {
+                print(error.localizedDescription)
             }
+            
+            
         }
-        .padding()
+        
+        Text(retrievedData ?? "No data retrieved")
     }
 }
 
