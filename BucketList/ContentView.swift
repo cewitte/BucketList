@@ -7,28 +7,40 @@
 
 import SwiftUI
 
+struct LoadingView: View {
+    var body: some View {
+        Text("Loading...")
+    }
+}
+
+struct SuccessView: View {
+    var body: some View {
+        Text("Success!")
+    }
+}
+
+struct FailedView: View {
+    var body: some View {
+        Text("Failed.")
+    }
+}
+
 struct ContentView: View {
-   
-    @State private var retrievedData: String?
+    enum LoadingState {
+        case loading, success, failed
+    }
+    
+    @State private var loadingState: LoadingState = .loading
     
     var body: some View {
-        Button("Read and Write") {
-            let data = Data("Test Message".utf8)
-            let url = URL.documentsDirectory.appending(path: "message.txt")
-            
-            do {
-                try data.write(to: url)
-                let readData = try Data(contentsOf: url)
-                print(String(data: readData, encoding: .utf8) ?? "Could not read data")
-                retrievedData = String(data: readData, encoding: .utf8)
-            } catch {
-                print(error.localizedDescription)
-            }
-            
-            
+        switch loadingState {
+        case .loading:
+            LoadingView()
+        case .success:
+            SuccessView()
+        case .failed:
+            FailedView()
         }
-        
-        Text(retrievedData ?? "No data retrieved")
     }
 }
 
