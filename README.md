@@ -48,3 +48,34 @@ let users = [
         User(id: UUID(), firstName: "Valéria", lastName: "Twists"),
 ].sorted()
 ```
+
+### Writing data to the documents directory
+
+Source URL: [Writing data to the documents directory](https://www.hackingwithswift.com/books/ios-swiftui/writing-data-to-the-documents-directory)
+
+Branch: `02-writing-to-documents-directory`
+
+"Previously we looked at how to read and write data to `UserDefaults`, which works great for user settings or small amounts of JSON, and we also looked at SwiftData, which is a great choice for times when you want relationships between objects, or more advanced sorting and filtering.
+
+In this app we’re going to look at a middle ground: we'll just write our data to a file directly. This isn't because I hate SwiftData, and in fact I think SwiftData would make a good choice here. Instead, it's so that I can show you the full spread of what's possible in iOS development, because there are lots of apps you'll work on that use exactly this approach to saving their data – it's good that you can at least see how it works.
+
+That being said, using `UserDefaults` is definitely a bad idea here, because there's no limit to how much data users can create in the app. `UserDefaults` is better used for simple settings and similar.
+
+Fortunately, iOS makes it very easy to read and write data from device storage, and in fact all apps get a directory for storing any kind of documents we want. Files here are automatically synchronized with iCloud backups, so if the user gets a new device then our data will be restored along with all the other system data – we don’t even need to think about it.
+
+There is a small catch – isn’t there always? – and it’s that all iOS apps are sandboxed, which means they run in their own container with a hard to guess directory name. As a result, we can’t – and shouldn’t try to – guess the directory where our app is installed, and instead need to rely on a special URL that points to our app’s documents directory:"
+
+```
+Button("Read and Write") {
+    let data = Data("Test Message".utf8)
+    let url = URL.documentsDirectory.appending(path: "message.txt")
+
+    do {
+        try data.write(to: url, options: [.atomic, .completeFileProtection])
+        let input = try String(contentsOf: url)
+        print(input)
+    } catch {
+        print(error.localizedDescription)
+    }
+}
+```
