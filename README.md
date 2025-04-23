@@ -134,3 +134,28 @@ struct FailedView: View {
     }
 }
 ```
+### Integrating `MapKit` with SwiftUI
+
+Source URL: [Integrating `MapKit` with SwiftUI](https://www.hackingwithswift.com/books/ios-swiftui/integrating-mapkit-with-swiftui)
+
+Branch: `04-integrating-mapkit`
+
+"Maps and all their configuration data come from a dedicated framework called MapKit, so our first step is to import that framework:"
+
+```
+import MapKit 
+```
+
+"And now we can place a map in our SwiftUI view, with just this:"
+
+```
+Map()
+```
+
+_Note: I`ve tried to leave all the examples that Paul gave on the same code snippet, which made it ugly, yet useful._ :smile:
+
+### Acknowledgments
+
+Original code created by: [Paul Hudson - @twostraws](https://x.com/twostraws) (Thank you!)
+
+Made with :heart: by [@cewitte](https://x.com/cewitte)
