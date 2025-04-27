@@ -6,100 +6,43 @@
 //
 
 import SwiftUI
-import MapKit
-
-struct Location: Identifiable {
-    var id: UUID = UUID()
-    var name: String
-    var coordinate: CLLocationCoordinate2D
-}
+import LocalAuthentication
 
 struct ContentView: View {
-    let locations = [
-        Location(name: "Buckingham Palace", coordinate: CLLocationCoordinate2D(latitude: 51.501389, longitude: -0.141389)),
-        Location(name: "Tower of London", coordinate: CLLocationCoordinate2D(latitude: 51.508333, longitude: -0.076222)),
-    ]
-    
-    @State private var position = MapCameraPosition.region(
-        MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 51.507222, longitude: -0.1275),
-            span: MKCoordinateSpan(latitudeDelta: 1, longitudeDelta: 1)
-        )
-    )
+    @State private var isUnlocked = false
     
     var body: some View {
         VStack {
-            Map()
-            
-            Spacer()
-            
-            Map()
-                .mapStyle(.imagery)
-            
-            Spacer()
-            
-            Map()
-                .mapStyle(.hybrid)
-            
-            Spacer()
-            
-            VStack {
-                Map(position: $position)
-                    .mapStyle(.hybrid(elevation: .realistic))
-                    .onMapCameraChange(frequency: .continuous) {context in
-                        print(context.region)
-                    }
-                
-                HStack(spacing: 50) {
-                    Button("Paris") {
-                        position = MapCameraPosition.region(
-                            MKCoordinateRegion(
-                                center: CLLocationCoordinate2D(latitude: 48.8566, longitude: 3.3522),
-                                span: MKCoordinateSpan(latitudeDelta: 1, longitudeDelta: 1))
-                        )
-                    }
-                    
-                    Button("Tokyo") {
-                        position = MapCameraPosition.region(
-                            MKCoordinateRegion(
-                                center: CLLocationCoordinate2D(latitude: 35.6897, longitude: 139.6922),
-                                span: MKCoordinateSpan(latitudeDelta: 1, longitudeDelta: 1))
-                        )
-                    }
-                }
+            if isUnlocked {
+                Text("Unlocked!")
+            } else {
+                Text("Locked")
             }
-            
-            Spacer()
-            
-            Map(interactionModes: [.rotate, .zoom])
-                .mapStyle(.standard)
-            
         }
+        .onAppear(perform: authenticate)
+    }
+    
+    func authenticate() {
+        let context = LAContext()
+        var error: NSError?
         
-        VStack {
-            MapReader { proxy in
-                Map()
-                    .onTapGesture { position in
-                        if let coordinate = proxy.convert(position, from: .local) {
-                            print(coordinate)
-                        }
-                    }
-            }
-            Map {
-                ForEach(locations) { location in
-                    Annotation(location.name, coordinate: location.coordinate) {
-                        Text(location.name)
-                            .font(.headline)
-                            .padding()
-                            .background(.blue.gradient)
-                            .foregroundStyle(.white)
-                            .clipShape(.capsule)
-                    }
-                    .annotationTitles(.hidden)
-                    
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            let reason = "We need to unlock your data."
+            
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics,
+                                   localizedReason: reason) { success, authenticationError in
+                if success {
+                    // authenticated successfully
+                    isUnlocked = true
+                } else {
+                    // there was a problem
+                    isUnlocked = false
                 }
-                
             }
+            
+            
+        } else {
+            // no biometrics
         }
     }
     

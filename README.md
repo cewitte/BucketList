@@ -134,6 +134,7 @@ struct FailedView: View {
     }
 }
 ```
+
 ### Integrating `MapKit` with SwiftUI
 
 Source URL: [Integrating `MapKit` with SwiftUI](https://www.hackingwithswift.com/books/ios-swiftui/integrating-mapkit-with-swiftui)
@@ -153,6 +154,16 @@ Map()
 ```
 
 _Note: I`ve tried to leave all the examples that Paul gave on the same code snippet, which made it ugly, yet useful._ :smile:
+
+### Using Touch ID and Face ID with SwiftUI
+
+Source URL: [Using Touch ID and Face ID with SwiftUI](https://www.hackingwithswift.com/books/ios-swiftui/using-touch-id-and-face-id-with-swiftui)
+
+Branch: `05-touchid-faceid`
+
+"The vast majority of Apple’s devices come with biometric authentication as standard, which means they use fingerprint, facial, and even iris recognition to unlock. This functionality is available to us too, which means we can make sure that sensitive data can only be read when unlocked by a valid user.
+
+This is another Objective-C API, but it’s only a little bit unpleasant to use with SwiftUI, which is better than we’ve had with some other frameworks we’ve looked at so far."
 
 ### Acknowledgments
 
