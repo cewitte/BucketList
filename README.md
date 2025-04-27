@@ -18,6 +18,32 @@ Source URL: [Adding user locations to a map](https://www.hackingwithswift.com/bo
 
 We’re going to start with a full-screen `Map` view, giving it an initial position."
 
+### Improving our map annotations
+
+Source URL: [Improving our map annotations](https://www.hackingwithswift.com/books/ios-swiftui/improving-our-map-annotations)
+
+In this commit, we are replacing our Marker with an Annotation, which allows us to add a custom View (in our example, a red star) instead of Apple's standard marker.
+
+We are also moving some code from the View to a more proper place: the `Location` struct, by adding a computed property that gives us the coordinate.
+
+Then, we create an example for debugging purposes, which will not be in the final release since we've wrapped it in the `#if debug` and `#endif` code annotation as below:
+
+```swift
+#if DEBUG
+    static let example = Location(id: UUID(), name: "Buckingham Palace", description: "The official residence of the British monarch.", latitude: 51.5074, longitude: -0.1278 )
+#endif
+```
+
+Finally, we create an operator override to comply with the `Equatable` protocol as below:
+
+```swift
+static func ==(lhs: Location, rhs: Location) -> Bool {
+    lhs.id == rhs.id
+}
+```
+
+"I’m a huge fan of making structs conform to Equatable as standard, even if you can’t use an optimized comparison function like above – structs are simple values like strings and integers, and I think we should extend that same status to our own custom structs too."
+
 ### Acknowledgments
 
 Original code created by: [Paul Hudson - @twostraws](https://x.com/twostraws) (Thank you!)
