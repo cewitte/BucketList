@@ -126,6 +126,54 @@ I double checked, and Paul's code doesn't seem to work for me (could it be an XC
 
 The `simultaneousGesture`made it work for me and apparently for other students as well.
 
+### Downloading data from Wikipedia
+
+Source URL: [Downloading data from Wikipedia](https://www.hackingwithswift.com/books/ios-swiftui/downloading-data-from-wikipedia)
+
+This commit doesn't bring many techniques as the previous one, but it has to highlights:
+
+#### Using enums to control View states
+
+Here's the complete example:
+
+```swift
+enum LoadingState {
+    case loading, loaded, failed
+}
+
+@State private var loadingState = LoadingState.loading
+@State private var pages = [Page]()
+
+Section("Nearby…") {
+    switch loadingState {
+    case .loaded:
+        ForEach(pages, id: \.pageid) { page in
+            Text(page.title)
+                .font(.headline)
+            + Text(": ") +
+            Text("Page description here")
+                .italic()
+        }
+    case .loading:
+        Text("Loading…")
+    case .failed:
+        Text("Please try again later.")
+    }
+}
+```
+
+#### Formatting text with `+`
+
+Very interesting way for adding multiple formating to a piece of text:
+
+```swift
+Text(page.title)
+    .font(.headline)
++ Text(": ") +
+Text("Page description here")
+    .italic()
+```
+
 ### Acknowledgments
 
 Original code created by: [Paul Hudson - @twostraws](https://x.com/twostraws) (Thank you!)
