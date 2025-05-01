@@ -17,6 +17,7 @@ struct ContentView: View {
     )
     
     @State private var locations = [Location]()
+    @State private var selectedPlace: Location?
     
     var body: some View {
         MapReader { proxy in
@@ -29,6 +30,10 @@ struct ContentView: View {
                             .frame(width: 44, height: 44)
                             .background(.white)
                             .clipShape(.circle)
+                            .onLongPressGesture {
+                                selectedPlace = location
+                            }
+                            .simultaneousGesture(LongPressGesture(minimumDuration: 1).onEnded { _ in selectedPlace = location }) // this is not Paul's original code. It was recommended by YouTube user`s @morderloth1 two months ago as a comment to the video lesson. It was the only way to make it work (at least in the simulator).
                     }
                 }
             }
@@ -37,6 +42,13 @@ struct ContentView: View {
                     if let coordinate = proxy.convert(position, from: .local) {
                         let newLocation = Location(id: UUID(), name: "New Location", description: "", latitude: coordinate.latitude, longitude: coordinate.longitude)
                         locations.append(newLocation)
+                    }
+                }
+                .sheet(item: $selectedPlace) { place in
+                    EditView(location: place) { newLocation in
+                        if let index = locations.firstIndex(of: place) {
+                            locations[index] = newLocation
+                        }
                     }
                 }
         }
