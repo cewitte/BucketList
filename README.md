@@ -174,6 +174,20 @@ Text("Page description here")
     .italic()
 ```
 
+### Sorting Wikipedia results
+
+Source URL: [Sorting Wikipedia results](https://www.hackingwithswift.com/books/ios-swiftui/sorting-wikipedia-results)
+
+This was not a big lesson, thus not adding too many new techniques. However, I find it very interesting the following code:
+
+```swift
+var description: String {
+    terms?["description"]?.first ?? "No further information"
+}
+```
+
+The computed property returns the description if it exists, or a fixed string otherwise.
+
 ### Acknowledgments
 
 Original code created by: [Paul Hudson - @twostraws](https://x.com/twostraws) (Thank you!)
