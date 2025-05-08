@@ -16,13 +16,12 @@ struct ContentView: View {
         )
     )
     
-    @State private var locations = [Location]()
-    @State private var selectedPlace: Location?
+    @State private var viewModel = ViewModel()
     
     var body: some View {
         MapReader { proxy in
             Map(initialPosition: startPosition) {
-                ForEach(locations) { location in
+                ForEach(viewModel.locations) { location in
                     Annotation(location.name, coordinate: location.coordinate) {
                         Image(systemName: "star.circle")
                             .resizable()
@@ -31,24 +30,21 @@ struct ContentView: View {
                             .background(.white)
                             .clipShape(.circle)
                             .onLongPressGesture {
-                                selectedPlace = location
+                                viewModel.selectedPlace = location
                             }
-                            .simultaneousGesture(LongPressGesture(minimumDuration: 1).onEnded { _ in selectedPlace = location }) // this is not Paul's original code. It was recommended by YouTube user`s @morderloth1 two months ago as a comment to the video lesson. It was the only way to make it work (at least in the simulator).
+                            .simultaneousGesture(LongPressGesture(minimumDuration: 1).onEnded { _ in viewModel.selectedPlace = location }) // this is not Paul's original code. It was recommended by YouTube user`s @morderloth1 two months ago as a comment to the video lesson. It was the only way to make it work (at least in the simulator).
                     }
                 }
             }
                 .mapStyle(.hybrid)
                 .onTapGesture { position in
                     if let coordinate = proxy.convert(position, from: .local) {
-                        let newLocation = Location(id: UUID(), name: "New Location", description: "", latitude: coordinate.latitude, longitude: coordinate.longitude)
-                        locations.append(newLocation)
+                        viewModel.addLocation(at: coordinate)
                     }
                 }
-                .sheet(item: $selectedPlace) { place in
-                    EditView(location: place) { newLocation in
-                        if let index = locations.firstIndex(of: place) {
-                            locations[index] = newLocation
-                        }
+                .sheet(item: $viewModel.selectedPlace) { place in
+                    EditView(location: place) {
+                        viewModel.update(location: $0)
                     }
                 }
         }

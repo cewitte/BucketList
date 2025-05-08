@@ -6,17 +6,17 @@ Paul Hudson's ([@twostraws](https://x.com/twostraws)) 100 Days of Swift UI Proje
 
 Source URL: [Bucket List: Introduction](https://www.hackingwithswift.com/books/ios-swiftui/bucket-list-introduction)
 
-"In this project we’re going to build an app that lets the user build a private list of places on the map that they intend to visit one day, add a description for that place, look up interesting places that are nearby, and save it all to the iOS storage for later.
+>In this project we’re going to build an app that lets the user build a private list of places on the map that they intend to visit one day, add a description for that place, look up interesting places that are nearby, and save it all to the iOS storage for later.
 
-To make all that work will mean leveraging some skills you’ve met already, such as forms, sheets, `Codable`, and `URLSession`, but also teach you some new skills: how to embed maps in a SwiftUI app, how to store private data safely so that only an authenticated user can access it, how to load and save data outside of `UserDefaults`, and more."
+>To make all that work will mean leveraging some skills you’ve met already, such as forms, sheets, `Codable`, and `URLSession`, but also teach you some new skills: how to embed maps in a SwiftUI app, how to store private data safely so that only an authenticated user can access it, how to load and save data outside of `UserDefaults`, and more.
 
 ### Adding user locations to a map
 
 Source URL: [Adding user locations to a map](https://www.hackingwithswift.com/books/ios-swiftui/adding-user-locations-to-a-map)
 
-"This project is going to be based around a map view, asking users to add places to the map that they want to visit. To do that we need to place a `Map` so that it takes up our whole view, track its annotations, and also whether or not the user is viewing place details.
+>This project is going to be based around a map view, asking users to add places to the map that they want to visit. To do that we need to place a `Map` so that it takes up our whole view, track its annotations, and also whether or not the user is viewing place details.
 
-We’re going to start with a full-screen `Map` view, giving it an initial position."
+>We’re going to start with a full-screen `Map` view, giving it an initial position.
 
 ### Improving our map annotations
 
@@ -42,7 +42,7 @@ static func ==(lhs: Location, rhs: Location) -> Bool {
 }
 ```
 
-"I’m a huge fan of making structs conform to Equatable as standard, even if you can’t use an optimized comparison function like above – structs are simple values like strings and integers, and I think we should extend that same status to our own custom structs too."
+>I’m a huge fan of making structs conform to Equatable as standard, even if you can’t use an optimized comparison function like above – structs are simple values like strings and integers, and I think we should extend that same status to our own custom structs too.
 
 ### Selecting and editing map annotations
 
@@ -89,7 +89,7 @@ init(location: Location, onSave: @escaping (Location) -> Void) {
 }
 ```
 
-"That `@escaping` part is important, and means the function is being stashed away for user later on, rather than being called immediately, and it’s needed here because the onSave function will get called only when the user presses Save."
+>That `@escaping` part is important, and means the function is being stashed away for user later on, rather than being called immediately, and it’s needed here because the onSave function will get called only when the user presses Save.
 
 #### We can update Preview by using a placeholder closure
 
@@ -107,7 +107,7 @@ EditView(location: place) { newLocation in
 }
 ```
 
-"That accepts the new location, then looks up where the current location is and replaces it in the array. This will cause our map to update immediately with the new data."
+>That accepts the new location, then looks up where the current location is and replaces it in the array. This will cause our map to update immediately with the new data.
 
 Here's the product of this commit: 
 
@@ -185,6 +185,13 @@ var description: String {
     terms?["description"]?.first ?? "No further information"
 }
 ```
+
+### Introducing MVVM into your SwiftUI project
+
+Here Paul introduces the MVVM (Model View View Model) design pattern, which really helps with cleaning complex Views. However, there is a major drawback. In Paul's words:
+
+>1. It works really badly with SwiftData, at least right now. This might improve in the future, but right now using SwiftData is basically impossible with MVVM.
+>2. There are lots of ways of structuring projects, with MVVM being just one of many. Spend some time experimenting rather than locking yourself into the first idea that comes along.
 
 The computed property returns the description if it exists, or a fixed string otherwise.
 
