@@ -188,6 +188,8 @@ var description: String {
 
 ### Introducing MVVM into your SwiftUI project
 
+Source URL: [Introducing MVVM into your SwiftUI project](https://www.hackingwithswift.com/books/ios-swiftui/introducing-mvvm-into-your-swiftui-project)
+
 Here Paul introduces the MVVM (Model View View Model) design pattern, which really helps with cleaning complex Views. However, there is a major drawback. In Paul's words:
 
 >1. It works really badly with SwiftData, at least right now. This might improve in the future, but right now using SwiftData is basically impossible with MVVM.
@@ -197,13 +199,13 @@ The computed property returns the description if it exists, or a fixed string ot
 
 ### Locking our UI behind Face ID
 
->To finish off our app, we’re going to make one last important change: we’re going to require the user to authenticate themselves using either Touch ID or Face ID in order to see all the places they have marked on the app. After all, this is their private data and we should be respectful of that, and of course it gives me a chance to let you use an important skill in a practical context!
-
-### Locking our UI behind Face ID
+Source URL: [Locking our UI behind Face ID](https://www.hackingwithswift.com/books/ios-swiftui/locking-our-ui-behind-face-id)
 
 >To finish off our app, we’re going to make one last important change: we’re going to require the user to authenticate themselves using either Touch ID or Face ID in order to see all the places they have marked on the app. After all, this is their private data and we should be respectful of that, and of course it gives me a chance to let you use an important skill in a practical context!
 
 ### Bucket List: Wrap up
+
+Source URL: [Bucket List: Wrap up](https://www.hackingwithswift.com/books/ios-swiftui/bucket-list-wrap-up)
 
 >I think this was our biggest project yet, but we’ve covered a huge amount of ground: adding `Comparable` to custom types, finding the documents directory, integrating MapKit, using biometric authentication, secure `Data` writing, and much more. And of course you have another real app, and hopefully you’re able to complete the challenges below to take it further.
 
@@ -216,6 +218,83 @@ The computed property returns the description if it exists, or a fixed string ot
 >3. Create another view model, this time for `EditView`. What you put in the view model is down to you, but I would recommend leaving `dismiss` and `onSave` in the view itself – the former uses the environment, which can only be read by the view, and the latter doesn’t really add anything when moved into the model.
 
 >Tip: That last challenge will require you to make a `State` instance in your `EditView` initializer – remember to use an underscore with the property name!
+
+### Challenge 1
+
+Branch: `challenge-01`
+
+>1. Allow the user to switch map modes, between the standard mode and hybrid.
+
+In order to solve this challenge, I created a button that sits on the toolbar that toogles between two view (`Map`) states (placed in the `ViewModel` class): 
+
+```swift
+var showHybridMap: Bool = false
+```
+
+I initially tried to create a `ZStack` to add the toolbar on top of the `Map`, but later found out that all I had to do was placing the `Map` view inside a `NavigationStack` in the view to make it happen _automagically_ .
+
+Then, I styled the button properly. Here's the complete code (with the exception of the `ViewModel` changes shown above):
+
+```swift
+NavigationStack {
+                MapReader { proxy in
+                    Map(initialPosition: startPosition) {
+                        ForEach(viewModel.locations) { location in
+                            Annotation(location.name, coordinate: location.coordinate) {
+                                Image(systemName: "star.circle")
+                                    .resizable()
+                                    .foregroundStyle(.red)
+                                    .frame(width: 44, height: 44)
+                                    .background(.white)
+                                    .clipShape(.circle)
+                                    .onLongPressGesture {
+                                        viewModel.selectedPlace = location
+                                    }
+                                    .simultaneousGesture(LongPressGesture(minimumDuration: 1).onEnded { _ in viewModel.selectedPlace = location }) // this is not Paul's original code. It was recommended by YouTube user`s @morderloth1 two months ago as a comment to the video lesson. It was the only way to make it work (at least in the simulator).
+                            }
+                        }
+                    }
+                    .ignoresSafeArea(edges: .all)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbarBackground(.hidden, for: .navigationBar)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button(action: {
+                                viewModel.showHybridMap.toggle()
+                            }) {
+                                Text(viewModel.showHybridMap ? "hybrid" : "standard")
+                                    .font(.system(size: 18, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .frame(minWidth: 80, alignment: .center)
+                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 12)
+                                    .background(Color.white.opacity(0.3))
+                                    .clipShape(Capsule())
+                                    .overlay(
+                                        Capsule().stroke(Color.white, lineWidth: 1.5)
+                                    )
+                            }
+                            
+                        }
+                    }
+                    .mapStyle(viewModel.showHybridMap ? .hybrid : .standard)
+                    .onTapGesture { position in
+                        if let coordinate = proxy.convert(position, from: .local) {
+                            viewModel.addLocation(at: coordinate)
+                        }
+                    }
+                    .sheet(item: $viewModel.selectedPlace) { place in
+                        EditView(location: place) {
+                            viewModel.update(location: $0)
+                        }
+                    }
+                }
+            }
+```
+
+And here's the result:
+
+![Switching between `.hybrid` and `.standard` map views](/images/hybrid_standard_map.gif)
 
 ## Acknowledgments
 

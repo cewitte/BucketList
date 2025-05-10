@@ -16,6 +16,8 @@ extension ContentView {
         private(set) var locations: [Location]
         var selectedPlace: Location?
         var isUnlocked = false
+        var showHybridMap: Bool = false
+        
         
         let savePath = URL.documentsDirectory.appending(path: "SavedPlaces")
         
