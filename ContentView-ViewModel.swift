@@ -17,7 +17,8 @@ extension ContentView {
         var selectedPlace: Location?
         var isUnlocked = false
         var showHybridMap: Bool = false
-        
+        var showAlert: Bool = false
+        var authenticationError = ""
         
         let savePath = URL.documentsDirectory.appending(path: "SavedPlaces")
         
@@ -70,11 +71,17 @@ extension ContentView {
                     if success {
                         self.isUnlocked = true
                     } else {
-                        // error
+                        // biometric (FaceID) authentication failed
+                        self.authenticationError = error?.localizedDescription ?? "You must authenticate yourself to unlock your places."
+                        self.showAlert.toggle()
+                        print(self.authenticationError)
                     }
                 }
             } else {
                 // no biometrics
+                self.authenticationError = error?.localizedDescription ?? "Biometrics authentication is not available on this device."
+                self.showAlert.toggle()
+                print(self.authenticationError)
             }
         }
     }

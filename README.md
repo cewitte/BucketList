@@ -296,6 +296,61 @@ And here's the result:
 
 ![Switching between `.hybrid` and `.standard` map views](/images/hybrid_standard_map.gif)
 
+### Challenge 2
+
+Branch: `challenge-01`
+
+>2. Our app silently fails when errors occur during biometric authentication, so add code to show those errors in an alert.
+
+Although iOS provides a default failed authentication message, I could not see any default messages for devices with no support for biometrics. I added code to handle authentication failures and an alert to be displayed in such cases:
+
+```swift
+func authenticate() {
+    let context = LAContext()
+    var error: NSError?
+    
+    if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+        let reason = "Please authenticate yourself to unlock your places."
+        context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+            if success {
+                self.isUnlocked = true
+            } else {
+                // biometric (FaceID) authentication failed
+                self.authenticationError = error?.localizedDescription ?? "You must authenticate yourself to unlock your places."
+                self.showAlert.toggle()
+                print(self.authenticationError)
+            }
+        }
+    } else {
+        // no biometrics
+        self.authenticationError = error?.localizedDescription ?? "Biometrics authentication is not available on this device."
+        self.showAlert.toggle()
+        print(self.authenticationError)
+    }
+}
+```
+
+Then I wrapped the "Unlock Places" button in a `NavigationStack`and added the alert:
+
+```swift
+NavigationStack {
+    Button("Unlock Places", action: viewModel.authenticate)
+            .padding()
+            .background(.blue)
+            .foregroundStyle(.white)
+            .clipShape(.capsule)
+    }
+    .alert("Authentication Failed", isPresented: $viewModel.showAlert) {
+        Button("OK", role: .cancel) { }
+    } message: {
+        Text(viewModel.authenticationError)
+    }
+```
+
+This is the result:
+
+
+
 ## Acknowledgments
 
 Original code created by: [Paul Hudson - @twostraws](https://x.com/twostraws) (Thank you!)

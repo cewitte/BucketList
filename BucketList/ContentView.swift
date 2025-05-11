@@ -19,7 +19,7 @@ struct ContentView: View {
     @State private var viewModel = ViewModel()
     
     var body: some View {
-        if true { // viewModel.isUnlocked
+        if viewModel.isUnlocked {
             NavigationStack {
                 MapReader { proxy in
                     Map(initialPosition: startPosition) {
@@ -53,11 +53,12 @@ struct ContentView: View {
                                     .padding(.vertical, 8)
                                     .padding(.horizontal, 12)
                                     .background(Color.white.opacity(0.3))
-                                    .clipShape(Capsule())
+                                    .clipShape(.capsule)
                                     .overlay(
                                         Capsule().stroke(Color.white, lineWidth: 1.5)
                                     )
                             }
+                            
                             
                         }
                     }
@@ -74,14 +75,19 @@ struct ContentView: View {
                     }
                 }
             }
-            
-            
         } else {
-            Button("Unlock Places", action: viewModel.authenticate)
-                .padding()
-                .background(.blue)
-                .foregroundStyle(.white)
-                .clipShape(.capsule)
+            NavigationStack {
+                Button("Unlock Places", action: viewModel.authenticate)
+                    .padding()
+                    .background(.blue)
+                    .foregroundStyle(.white)
+                    .clipShape(.capsule)
+            }
+            .alert("Authentication Failed", isPresented: $viewModel.showAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(viewModel.authenticationError)
+            }
         }
     }
 }
