@@ -349,7 +349,7 @@ NavigationStack {
 
 This is the result:
 
-
+![Authentication Errors](/images/authentication_error.gif)
 
 ## Acknowledgments
 
