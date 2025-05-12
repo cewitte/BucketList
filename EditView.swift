@@ -9,10 +9,12 @@ import SwiftUI
 
 struct EditView: View {
     @Environment(\.dismiss) var dismiss
-    var location: Location
+//    var location: Location
+//    
+//    @State private var name: String
+//    @State private var description: String
     
-    @State private var name: String
-    @State private var description: String
+    @State private var viewModel : ViewModel
     
     var onSave: (Location) -> Void
     
@@ -27,8 +29,8 @@ struct EditView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Place name", text: $name)
-                    TextField("Description", text: $description)
+                    TextField("Place name", text: $viewModel.name)
+                    TextField("Description", text: $viewModel.description)
                 }
                 
                 Section("Nearby…") {
@@ -51,10 +53,10 @@ struct EditView: View {
             .navigationTitle("Place details")
             .toolbar {
                 Button("Save") {
-                    var newLocation = location
+                    var newLocation = viewModel.location
                     newLocation.id = UUID()
-                    newLocation.name = name
-                    newLocation.description = description
+                    newLocation.name = viewModel.name
+                    newLocation.description = viewModel.description
                     
                     onSave(newLocation)
                     dismiss()
@@ -67,7 +69,7 @@ struct EditView: View {
     }
     
     func fetchNearbyPlaces() async {
-        let urlString = "https://en.wikipedia.org/w/api.php?ggscoord=\(location.latitude)%7C\(location.longitude)&action=query&prop=coordinates%7Cpageimages%7Cpageterms&colimit=50&piprop=thumbnail&pithumbsize=500&pilimit=50&wbptterms=description&generator=geosearch&ggsradius=10000&ggslimit=50&format=json"
+        let urlString = "https://en.wikipedia.org/w/api.php?ggscoord=\(viewModel.location.latitude)%7C\(viewModel.location.longitude)&action=query&prop=coordinates%7Cpageimages%7Cpageterms&colimit=50&piprop=thumbnail&pithumbsize=500&pilimit=50&wbptterms=description&generator=geosearch&ggsradius=10000&ggslimit=50&format=json"
         
         guard let url = URL(string: urlString) else {
             print("Invalid URL: \(urlString)")
@@ -91,11 +93,18 @@ struct EditView: View {
     
     // the @escaping part is important, and means the function is being stashed away for user later on, rather than being called immediately, and it’s needed here because the onSave function will get called only when the user presses Save.
     init(location: Location, onSave: @escaping (Location) -> Void) {
-        self.location = location
+        _viewModel = State(initialValue: .init(
+            name: location.name,
+            description: location.description,
+            location: location
+        ))
+        
+        
+//        _viewModel.location = location
         self.onSave = onSave
         
-        _name = State(initialValue: location.name)
-        _description = State(initialValue: location.description)
+//        name = State(initialValue: location.name)
+//        description = State(initialValue: location.description)
     }
 }
 
