@@ -298,7 +298,7 @@ And here's the result:
 
 ### Challenge 2
 
-Branch: `challenge-01`
+Branch: `challenge-02`
 
 >2. Our app silently fails when errors occur during biometric authentication, so add code to show those errors in an alert.
 
@@ -350,6 +350,140 @@ NavigationStack {
 This is the result:
 
 ![Authentication Errors](/images/authentication_error.gif)
+
+### Challenge 3
+
+Branch: `challenge-03`
+
+>3. Create another view model, this time for `EditView`. What you put in the view model is down to you, but I would recommend leaving `dismiss` and `onSave` in the view itself – the former uses the environment, which can only be read by the view, and the latter doesn’t really add anything when moved into the model.
+
+Although it may be useful for (really) complex Views, at least in this particular example MVVM feels like throwing dirt under the carpet. Also, the fact that it doesn't work well with SwiftData demotivates me from using it. I would rather create sub-views to make the code cleaner.
+
+Either way, I managed to move a lot of code from `EditView` to `EditView-ViewModel`. Here's how `EditView` is looking now:
+
+```swift
+import SwiftUI
+
+struct EditView: View {
+    @Environment(\.dismiss) var dismiss
+    
+    @State private var viewModel : ViewModel
+    
+    var onSave: (Location) -> Void
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("Place name", text: $viewModel.name)
+                    TextField("Description", text: $viewModel.description)
+                }
+                
+                Section("Nearby…") {
+                    switch viewModel.loadingState {
+                    case .loaded:
+                        ForEach(viewModel.pages, id: \.pageid) { page in
+                            Text(page.title)
+                                .font(.headline)
+                            + Text(": ") +
+                            Text(page.description)
+                                .italic()
+                        }
+                    case .loading:
+                        Text("Loading…")
+                    case .failed:
+                        Text("Please try again later.")
+                    }
+                }
+            }
+            .navigationTitle("Place details")
+            .toolbar {
+                Button("Save") {
+                    var newLocation = viewModel.location
+                    newLocation.id = UUID()
+                    newLocation.name = viewModel.name
+                    newLocation.description = viewModel.description
+                    
+                    onSave(newLocation)
+                    dismiss()
+                }
+            }
+            .task {
+                await viewModel.fetchNearbyPlaces()
+            }
+        }
+    }
+    
+    // the @escaping part is important, and means the function is being stashed away for user later on, rather than being called immediately, and it’s needed here because the onSave function will get called only when the user presses Save.
+    init(location: Location, onSave: @escaping (Location) -> Void) {
+        _viewModel = State(initialValue: .init(
+            name: location.name,
+            description: location.description,
+            location: location
+        ))
+        
+        self.onSave = onSave
+    }
+}
+
+#Preview {
+    // just passing in a placeholder closure is fine here
+    EditView(location: .example) { _ in }
+}
+```
+
+... And the `EditView-ViewModel` after moving code to MVVM:
+
+```swift
+import Foundation
+
+extension EditView {
+    
+    @Observable
+    class ViewModel {
+        var name: String
+        var description: String
+        var location: Location
+        var loadingState: LoadingState = .loading
+        var pages = [Page]()
+        
+        enum LoadingState {
+            case loading, loaded, failed
+        }
+        
+        init (name: String, description: String, location: Location) {
+            self.name = name
+            self.description = description
+            self.location = location
+        }
+        
+        func fetchNearbyPlaces() async {
+            let urlString = "https://en.wikipedia.org/w/api.php?ggscoord=\(location.latitude)%7C\(location.longitude)&action=query&prop=coordinates%7Cpageimages%7Cpageterms&colimit=50&piprop=thumbnail&pithumbsize=500&pilimit=50&wbptterms=description&generator=geosearch&ggsradius=10000&ggslimit=50&format=json"
+            
+            guard let url = URL(string: urlString) else {
+                print("Invalid URL: \(urlString)")
+                return
+            }
+            
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                
+                // we got some data back
+                let items = try JSONDecoder().decode(Result.self, from: data)
+                
+                // success - convert the array values into our pages array
+                pages = items.query.pages.values.sorted()
+                loadingState = .loaded
+                
+            } catch {
+                loadingState = .failed
+            }
+        }
+    }
+}
+```
+
+As expected, code continued to work as before.
 
 ## Acknowledgments
 
