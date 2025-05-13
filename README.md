@@ -188,6 +188,8 @@ var description: String {
 
 ### Introducing MVVM into your SwiftUI project
 
+Source URL: [Introducing MVVM into your SwiftUI project](https://www.hackingwithswift.com/books/ios-swiftui/introducing-mvvm-into-your-swiftui-project)
+
 Here Paul introduces the MVVM (Model View View Model) design pattern, which really helps with cleaning complex Views. However, there is a major drawback. In Paul's words:
 
 >1. It works really badly with SwiftData, at least right now. This might improve in the future, but right now using SwiftData is basically impossible with MVVM.
@@ -197,13 +199,13 @@ The computed property returns the description if it exists, or a fixed string ot
 
 ### Locking our UI behind Face ID
 
->To finish off our app, we’re going to make one last important change: we’re going to require the user to authenticate themselves using either Touch ID or Face ID in order to see all the places they have marked on the app. After all, this is their private data and we should be respectful of that, and of course it gives me a chance to let you use an important skill in a practical context!
-
-### Locking our UI behind Face ID
+Source URL: [Locking our UI behind Face ID](https://www.hackingwithswift.com/books/ios-swiftui/locking-our-ui-behind-face-id)
 
 >To finish off our app, we’re going to make one last important change: we’re going to require the user to authenticate themselves using either Touch ID or Face ID in order to see all the places they have marked on the app. After all, this is their private data and we should be respectful of that, and of course it gives me a chance to let you use an important skill in a practical context!
 
 ### Bucket List: Wrap up
+
+Source URL: [Bucket List: Wrap up](https://www.hackingwithswift.com/books/ios-swiftui/bucket-list-wrap-up)
 
 >I think this was our biggest project yet, but we’ve covered a huge amount of ground: adding `Comparable` to custom types, finding the documents directory, integrating MapKit, using biometric authentication, secure `Data` writing, and much more. And of course you have another real app, and hopefully you’re able to complete the challenges below to take it further.
 
@@ -216,6 +218,272 @@ The computed property returns the description if it exists, or a fixed string ot
 >3. Create another view model, this time for `EditView`. What you put in the view model is down to you, but I would recommend leaving `dismiss` and `onSave` in the view itself – the former uses the environment, which can only be read by the view, and the latter doesn’t really add anything when moved into the model.
 
 >Tip: That last challenge will require you to make a `State` instance in your `EditView` initializer – remember to use an underscore with the property name!
+
+### Challenge 1
+
+Branch: `challenge-01`
+
+>1. Allow the user to switch map modes, between the standard mode and hybrid.
+
+In order to solve this challenge, I created a button that sits on the toolbar that toogles between two view (`Map`) states (placed in the `ViewModel` class): 
+
+```swift
+var showHybridMap: Bool = false
+```
+
+I initially tried to create a `ZStack` to add the toolbar on top of the `Map`, but later found out that all I had to do was placing the `Map` view inside a `NavigationStack` in the view to make it happen _automagically_ .
+
+Then, I styled the button properly. Here's the complete code (with the exception of the `ViewModel` changes shown above):
+
+```swift
+NavigationStack {
+                MapReader { proxy in
+                    Map(initialPosition: startPosition) {
+                        ForEach(viewModel.locations) { location in
+                            Annotation(location.name, coordinate: location.coordinate) {
+                                Image(systemName: "star.circle")
+                                    .resizable()
+                                    .foregroundStyle(.red)
+                                    .frame(width: 44, height: 44)
+                                    .background(.white)
+                                    .clipShape(.circle)
+                                    .onLongPressGesture {
+                                        viewModel.selectedPlace = location
+                                    }
+                                    .simultaneousGesture(LongPressGesture(minimumDuration: 1).onEnded { _ in viewModel.selectedPlace = location }) // this is not Paul's original code. It was recommended by YouTube user`s @morderloth1 two months ago as a comment to the video lesson. It was the only way to make it work (at least in the simulator).
+                            }
+                        }
+                    }
+                    .ignoresSafeArea(edges: .all)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbarBackground(.hidden, for: .navigationBar)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button(action: {
+                                viewModel.showHybridMap.toggle()
+                            }) {
+                                Text(viewModel.showHybridMap ? "hybrid" : "standard")
+                                    .font(.system(size: 18, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .frame(minWidth: 80, alignment: .center)
+                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 12)
+                                    .background(Color.white.opacity(0.3))
+                                    .clipShape(Capsule())
+                                    .overlay(
+                                        Capsule().stroke(Color.white, lineWidth: 1.5)
+                                    )
+                            }
+                            
+                        }
+                    }
+                    .mapStyle(viewModel.showHybridMap ? .hybrid : .standard)
+                    .onTapGesture { position in
+                        if let coordinate = proxy.convert(position, from: .local) {
+                            viewModel.addLocation(at: coordinate)
+                        }
+                    }
+                    .sheet(item: $viewModel.selectedPlace) { place in
+                        EditView(location: place) {
+                            viewModel.update(location: $0)
+                        }
+                    }
+                }
+            }
+```
+
+And here's the result:
+
+![Switching between `.hybrid` and `.standard` map views](/images/hybrid_standard_map.gif)
+
+### Challenge 2
+
+Branch: `challenge-02`
+
+>2. Our app silently fails when errors occur during biometric authentication, so add code to show those errors in an alert.
+
+Although iOS provides a default failed authentication message, I could not see any default messages for devices with no support for biometrics. I added code to handle authentication failures and an alert to be displayed in such cases:
+
+```swift
+func authenticate() {
+    let context = LAContext()
+    var error: NSError?
+    
+    if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+        let reason = "Please authenticate yourself to unlock your places."
+        context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+            if success {
+                self.isUnlocked = true
+            } else {
+                // biometric (FaceID) authentication failed
+                self.authenticationError = error?.localizedDescription ?? "You must authenticate yourself to unlock your places."
+                self.showAlert.toggle()
+                print(self.authenticationError)
+            }
+        }
+    } else {
+        // no biometrics
+        self.authenticationError = error?.localizedDescription ?? "Biometrics authentication is not available on this device."
+        self.showAlert.toggle()
+        print(self.authenticationError)
+    }
+}
+```
+
+Then I wrapped the "Unlock Places" button in a `NavigationStack`and added the alert:
+
+```swift
+NavigationStack {
+    Button("Unlock Places", action: viewModel.authenticate)
+            .padding()
+            .background(.blue)
+            .foregroundStyle(.white)
+            .clipShape(.capsule)
+    }
+    .alert("Authentication Failed", isPresented: $viewModel.showAlert) {
+        Button("OK", role: .cancel) { }
+    } message: {
+        Text(viewModel.authenticationError)
+    }
+```
+
+This is the result:
+
+![Authentication Errors](/images/authentication_error.gif)
+
+### Challenge 3
+
+Branch: `challenge-03`
+
+>3. Create another view model, this time for `EditView`. What you put in the view model is down to you, but I would recommend leaving `dismiss` and `onSave` in the view itself – the former uses the environment, which can only be read by the view, and the latter doesn’t really add anything when moved into the model.
+
+Although it may be useful for (really) complex Views, at least in this particular example MVVM feels like throwing dirt under the carpet. Also, the fact that it doesn't work well with SwiftData demotivates me from using it. I would rather create sub-views to make the code cleaner.
+
+Either way, I managed to move a lot of code from `EditView` to `EditView-ViewModel`. Here's how `EditView` is looking now:
+
+```swift
+import SwiftUI
+
+struct EditView: View {
+    @Environment(\.dismiss) var dismiss
+    
+    @State private var viewModel : ViewModel
+    
+    var onSave: (Location) -> Void
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("Place name", text: $viewModel.name)
+                    TextField("Description", text: $viewModel.description)
+                }
+                
+                Section("Nearby…") {
+                    switch viewModel.loadingState {
+                    case .loaded:
+                        ForEach(viewModel.pages, id: \.pageid) { page in
+                            Text(page.title)
+                                .font(.headline)
+                            + Text(": ") +
+                            Text(page.description)
+                                .italic()
+                        }
+                    case .loading:
+                        Text("Loading…")
+                    case .failed:
+                        Text("Please try again later.")
+                    }
+                }
+            }
+            .navigationTitle("Place details")
+            .toolbar {
+                Button("Save") {
+                    var newLocation = viewModel.location
+                    newLocation.id = UUID()
+                    newLocation.name = viewModel.name
+                    newLocation.description = viewModel.description
+                    
+                    onSave(newLocation)
+                    dismiss()
+                }
+            }
+            .task {
+                await viewModel.fetchNearbyPlaces()
+            }
+        }
+    }
+    
+    // the @escaping part is important, and means the function is being stashed away for user later on, rather than being called immediately, and it’s needed here because the onSave function will get called only when the user presses Save.
+    init(location: Location, onSave: @escaping (Location) -> Void) {
+        _viewModel = State(initialValue: .init(
+            name: location.name,
+            description: location.description,
+            location: location
+        ))
+        
+        self.onSave = onSave
+    }
+}
+
+#Preview {
+    // just passing in a placeholder closure is fine here
+    EditView(location: .example) { _ in }
+}
+```
+
+... And the `EditView-ViewModel` after moving code to MVVM:
+
+```swift
+import Foundation
+
+extension EditView {
+    
+    @Observable
+    class ViewModel {
+        var name: String
+        var description: String
+        var location: Location
+        var loadingState: LoadingState = .loading
+        var pages = [Page]()
+        
+        enum LoadingState {
+            case loading, loaded, failed
+        }
+        
+        init (name: String, description: String, location: Location) {
+            self.name = name
+            self.description = description
+            self.location = location
+        }
+        
+        func fetchNearbyPlaces() async {
+            let urlString = "https://en.wikipedia.org/w/api.php?ggscoord=\(location.latitude)%7C\(location.longitude)&action=query&prop=coordinates%7Cpageimages%7Cpageterms&colimit=50&piprop=thumbnail&pithumbsize=500&pilimit=50&wbptterms=description&generator=geosearch&ggsradius=10000&ggslimit=50&format=json"
+            
+            guard let url = URL(string: urlString) else {
+                print("Invalid URL: \(urlString)")
+                return
+            }
+            
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                
+                // we got some data back
+                let items = try JSONDecoder().decode(Result.self, from: data)
+                
+                // success - convert the array values into our pages array
+                pages = items.query.pages.values.sorted()
+                loadingState = .loaded
+                
+            } catch {
+                loadingState = .failed
+            }
+        }
+    }
+}
+```
+
+As expected, code continued to work as before.
 
 ## Acknowledgments
 

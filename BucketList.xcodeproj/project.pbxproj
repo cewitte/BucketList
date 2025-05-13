@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C88E99932DC91A8000ADC1C2 /* ContentView-ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88E99922DC91A8000ADC1C2 /* ContentView-ViewModel.swift */; };
+		C88E99972DD1071C00ADC1C2 /* EditView-ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88E99962DD1071C00ADC1C2 /* EditView-ViewModel.swift */; };
 		C89A770B2DBEEEE20015D749 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89A770A2DBEEEE20015D749 /* Location.swift */; };
 		C89A770D2DBFB0430015D749 /* EditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89A770C2DBFB0430015D749 /* EditView.swift */; };
 		C89A770F2DC4084A0015D749 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89A770E2DC4084A0015D749 /* Result.swift */; };
@@ -16,6 +17,7 @@
 /* Begin PBXFileReference section */
 		C85BD3552DB5CA1100294152 /* BucketList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BucketList.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C88E99922DC91A8000ADC1C2 /* ContentView-ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView-ViewModel.swift"; sourceTree = "<group>"; };
+		C88E99962DD1071C00ADC1C2 /* EditView-ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EditView-ViewModel.swift"; sourceTree = "<group>"; };
 		C89A770A2DBEEEE20015D749 /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
 		C89A770C2DBFB0430015D749 /* EditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditView.swift; sourceTree = "<group>"; };
 		C89A770E2DC4084A0015D749 /* Result.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
@@ -43,6 +45,7 @@
 		C85BD34C2DB5CA1100294152 = {
 			isa = PBXGroup;
 			children = (
+				C88E99962DD1071C00ADC1C2 /* EditView-ViewModel.swift */,
 				C88E99922DC91A8000ADC1C2 /* ContentView-ViewModel.swift */,
 				C89A770E2DC4084A0015D749 /* Result.swift */,
 				C89A770C2DBFB0430015D749 /* EditView.swift */,
@@ -137,6 +140,7 @@
 				C89A770F2DC4084A0015D749 /* Result.swift in Sources */,
 				C89A770B2DBEEEE20015D749 /* Location.swift in Sources */,
 				C89A770D2DBFB0430015D749 /* EditView.swift in Sources */,
+				C88E99972DD1071C00ADC1C2 /* EditView-ViewModel.swift in Sources */,
 				C88E99932DC91A8000ADC1C2 /* ContentView-ViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
